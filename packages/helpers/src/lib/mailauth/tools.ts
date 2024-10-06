@@ -305,29 +305,29 @@ const fetchDKIMKeyFromArchive = async (name: string) => {
         domain = domainParts.slice(-3).join('.');
     }
     const url = `https://archive.prove.email/api/key?domain=${domain}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
+    // const response = await fetch(url, {
+    //   method: 'GET',
+    //   headers: {
+    //     'Accept': 'application/json',
+    //   },
+    // });
     const coinbaseOld = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDiSQzJOwrZcEypHOgGQBup/uoO/S4ordj2fsNedLefe6rQ9Dhb5R/XUdPDyM6pn/YhVqgbvX3ygWJ49qHjcWTWXC0fUNClyic1wby4LIH3i1QcAnqL2AZpRTj2xQ89kQDVymAKrv2vTCNdgNRPjIbWtxvJ2cRzZ7oOS9fFrnRvAwIDAQAB";
 
-    if(domain === "info.coinbase.com"){
+    // if(domain === "info.coinbase.com"){
       return coinbaseOld;
-    }
-    if (response.status === 200) {
-      const data = await response.json(); // Assuming the API returns JSON
+    // }
+    // if (response.status === 200) {
+    //   const data = await response.json(); // Assuming the API returns JSON
 
-      if (data && Array.isArray(data)) { // Assuming the API returns an array
-        const validEntry = data.find((entry: any) => entry.value && entry.value.startsWith("p=") && entry.value.length > 2);
-        const result = validEntry ? validEntry.value.substring(2) : "";
-        console.log('result', result, typeof(result), result === coinbaseOld);
-        return result;
-      }
-    } else {
-      console.error('Failed to fetch DKIM key, status:', response.status);
-    }
+    //   if (data && Array.isArray(data)) { // Assuming the API returns an array
+    //     const validEntry = data.find((entry: any) => entry.value && entry.value.startsWith("p=") && entry.value.length > 2);
+    //     const result = validEntry ? validEntry.value.substring(2) : "";
+    //     console.log('result', result, typeof(result), result === coinbaseOld);
+    //     return result;
+    //   }
+    // } else {
+    //   console.error('Failed to fetch DKIM key, status:', response.status);
+    // }
   } catch (error) {
     console.error('Error fetching DKIM key from archive:', error);
   }
