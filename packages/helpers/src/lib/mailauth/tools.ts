@@ -298,14 +298,34 @@ function importRsaKey(pem: string) {
 
 
 const fetchDKIMKeyFromArchive = async (name: string) => {
-  const response = await fetch(`https://archive.prove.email/api/key?domain=${name}`);
-  if (response.status === 200) {
-    const data = await response.json();
-    if (data && data.value) {
-      const validEntry = data.find((entry: any) => entry.value && entry.value.startsWith("p=") && entry.value.length > 2);
-      return validEntry ? validEntry.value.substring(2) : "";
+  try {
+    const domainParts = name.split('.');
+    let domain = domainParts.slice(-2).join('.');
+    if (domainParts.length > 2 && domainParts[domainParts.length - 3] !== '_domainkey') {
+        domain = domainParts.slice(-3).join('.');
     }
+    const url = `https://archive.prove.email/api/key?domain=${domain}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json(); // Assuming the API returns JSON
+
+      if (data && Array.isArray(data)) { // Assuming the API returns an array
+        const validEntry = data.find((entry: any) => entry.value && entry.value.startsWith("p=") && entry.value.length > 2);
+        return validEntry ? validEntry.value.substring(2) : "";
+      }
+    } else {
+      console.error('Failed to fetch DKIM key, status:', response.status);
+    }
+  } catch (error) {
+    console.error('Error fetching DKIM key from archive:', error);
   }
+
   return null;
 };
 
@@ -339,6 +359,7 @@ export const getPublicKey = async (
       // Check the DKIM Archive API
       try {
         publicKeyValue = await fetchDKIMKeyFromArchive(name);
+        console.log('publicKeyValue', publicKeyValue);
         if (!publicKeyValue) {
           throw new CustomError("No DKIM key found in archive", "ENODATA");
         }

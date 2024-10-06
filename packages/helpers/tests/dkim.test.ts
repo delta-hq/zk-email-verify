@@ -102,3 +102,19 @@ describe('DKIM with sanitization', () => {
     expect(result.appliedSanitization).toBe('removeLabels');
   });
 });
+
+
+describe('DKIM old', () => {
+  it('should not pass as DKIM selector does not have a public key', async () => {
+    const email = fs.readFileSync(
+      path.join(__dirname, 'test-data/email-expired-selector.eml'),
+    );
+
+    // Add a label to the subject
+    console.log('hi')
+    const result = await verifyDKIMSignature(email);
+    console.log(result);
+
+    expect(result.appliedSanitization).toBe('removeLabels');
+  });
+});
