@@ -4,6 +4,8 @@ export enum DoHServer {
     Google = "https://dns.google/resolve",
     // Cloudflare DNS
     Cloudflare = "https://cloudflare-dns.com/dns-query",
+    // Cloudflare DNS
+    Archive = "https://archive.prove.email/api",
 }
 
 /**

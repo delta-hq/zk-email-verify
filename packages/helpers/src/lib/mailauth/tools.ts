@@ -296,6 +296,19 @@ function importRsaKey(pem: string) {
   );
 }
 
+
+const fetchDKIMKeyFromArchive = async (name: string) => {
+  const response = await fetch(`https://archive.prove.email/api/key?domain=${name}`);
+  if (response.status === 200) {
+    const data = await response.json();
+    if (data && data.value) {
+      const validEntry = data.find((entry: any) => entry.value && entry.value.startsWith("p=") && entry.value.length > 2);
+      return validEntry ? validEntry.value.substring(2) : "";
+    }
+  }
+  return null;
+};
+
 export const getPublicKey = async (
   type: string,
   name: string,
@@ -320,14 +333,19 @@ export const getPublicKey = async (
     // prefix value for parsing as there is no default value
     let entry = parseDkimHeaders("DNS: TXT;" + rr);
 
-    const publicKeyValue = entry?.parsed?.p?.value;
+    let publicKeyValue = entry?.parsed?.p?.value;
 
-    //'v=DKIM1;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwe34ubzrMzM9sT0XVkcc3UXd7W+EHCyHoqn70l2AxXox52lAZzH/UnKwAoO+5qsuP7T9QOifIJ9ddNH9lEQ95Y/GdHBsPLGdgSJIs95mXNxscD6MSyejpenMGL9TPQAcxfqY5xPViZ+1wA1qcryjdZKRqf1f4fpMY+x3b8k7H5Qyf/Smz0sv4xFsx1r+THNIz0rzk2LO3GvE0f1ybp6P+5eAelYU4mGeZQqsKw/eB20I3jHWEyGrXuvzB67nt6ddI+N2eD5K38wg/aSytOsb5O+bUSEe7P0zx9ebRRVknCD6uuqG3gSmQmttlD5OrMWSXzrPIXe8eTBaaPd+e/jfxwIDAQAB'
-    // v=DKIM1;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwe34ubzrMzM9sT0XVkcc3UXd7W+EHCyHoqn70l2AxXox52lAZzH/UnKwAoO+5qsuP7T9QOifIJ9ddNH9lEQ95Y/GdHBsPLGdgSJIs95mXNxscD6MSyejpenMGL9TPQAcxfqY5xPViZ+1wA1qcr""yjdZKRqf1f4fpMY+x3b8k7H5Qyf/Smz0sv4xFsx1r+THNIz0rzk2LO3GvE0f1ybp6P+5eAelYU4mGeZQqsKw/eB20I3jHWEyGrXuvzB67nt6ddI+N2eD5K38wg/aSytOsb5O+bUSEe7P0zx9ebRRVknCD6uuqG3gSmQmttlD5OrMWSXzrPIXe8eTBaaPd+e/jfxwIDAQAB
     if (!publicKeyValue) {
-      const err = new CustomError("Missing key value", "EINVALIDVAL", rr);
-      throw err;
-    }
+      // Check the DKIM Archive API
+      try {
+        publicKeyValue = await fetchDKIMKeyFromArchive(name);
+        if (!publicKeyValue) {
+          throw new CustomError("No DKIM key found in archive", "ENODATA");
+        }
+      } catch (error: unknown) {
+          throw new CustomError("Unexpected error fetching DKIM key from archive", "EARCHIVE", String(error));
+        }
+      }
 
     /*let validation = base64Schema.validate(publicKeyValue);
         if (validation.error) {
