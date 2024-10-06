@@ -1,6 +1,6 @@
 {
   "name": "@obl-zk/helpers",
-  "version": "6.1.10",
+  "version": "6.1.11",
   "license": "MIT",
   "main": "dist",
   "scripts": {
