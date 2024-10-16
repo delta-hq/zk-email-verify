@@ -3,12 +3,13 @@ import { CustomError } from '../lib/mailauth/tools';
 const ZKEMAIL_DNS_ARCHIVER_API = 'https://archive.prove.email/api/key';
 
 export async function resolveDNSFromZKEmailArchive(name: string, type: string) {
+  console.log('resolving DNS from ZK Email Archive');
   if (type !== 'TXT') {
     throw new Error(`ZK Email Archive only supports TXT records - got ${type}`);
   }
 
   // Get domain from full dns record name - $selector._domainkey.$domain.com
-  const domain = name.split('.').slice(-2).join('.');
+  const domain = name.split('.').slice(-3).join('.');
   const selector = name.split('.')[0];
 
   const queryUrl = new URL(ZKEMAIL_DNS_ARCHIVER_API);

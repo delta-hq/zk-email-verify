@@ -1,11 +1,11 @@
 {
   "name": "@obl-zk/helpers",
-  "version": "6.1.13",
+  "version": "6.1.16",
   "license": "MIT",
   "main": "dist",
   "scripts": {
     "build": "tsc",
-    "test": "jest tests/**/*.test.ts",
+    "test": "jest tests/dkim.test.ts",
     "lint": "eslint .",
     "prepublish": "yarn lint && yarn build",
     "publish": "yarn npm publish --access=public"

@@ -105,7 +105,7 @@ async function tryVerifyDKIM(
       return result;
     } catch (e) {
       if (fallbackToZKEmailDNSArchive) {
-        console.log('DNS over HTTP failed, falling back to ZK Email Archive');
+        // console.log('DNS over HTTP failed, falling back to ZK Email Archive');
         const result = await resolveDNSFromZKEmailArchive(name, type);
         return result;
       }
@@ -127,6 +127,8 @@ async function tryVerifyDKIM(
 
     domainToVerifyDKIM = dkimVerifier.headerFrom[0].split('@')[1];
   }
+
+  // console.log('dkimVerifier.results', dkimVerifier.results);
 
   const dkimResult = dkimVerifier.results.find((d: any) => d.signingDomain === domainToVerifyDKIM);
 
